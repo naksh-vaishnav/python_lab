@@ -1,0 +1,71 @@
+
+import random
+
+# --- Global Game Configuration ---
+
+# The valid choices for the game.
+choice = ["snake", "water", "gun"]
+
+# The 3x3 matrix (list of lists) that defines the game results.
+# The rows represent the Player's choice (Player Index).
+# The columns represent the Computer's choice (Computer Index).
+# 
+# Key:
+#   D = Draw
+#   W = Player Wins
+#   L = Player Loses
+#
+# Matrix layout (Row = Player, Column = Computer):
+#                | Snake (0) | Water (1) | Gun (2)
+# ------------------------------------------------
+# Snake (0)      |     D     |     W     |     L
+# Water (1)      |     L     |     D     |     W
+# Gun (2)        |     W     |     L     |     D
+# ------------------------------------------------
+lists = [
+    ["D", "W", "L"],        
+    ["L", "D", "W"],
+    ["W", "L", "D"]
+]
+
+# --- Main Game Loop ---
+
+while True:
+
+    # 1. Get Player Input
+    # Convert input to lowercase for case-insensitive matching.
+    player_choice = input("Enter Snake, Water or Gun (or quit to stop): ").lower()
+    
+    # Check for exit command
+    if player_choice == "quit":
+        print("\n👋 Thanks for playing! Game stopped.")
+        break
+        
+    # Input validation
+    if player_choice not in choice:
+        print("❌ Enter a valid choice (Snake, Water, or Gun).")
+        continue
+
+    # 2. Get Computer Choice
+    computer_choice = random.choice(choice)
+    print(f"🤖 The computer chose: {computer_choice.capitalize()}")
+
+    # 3. Determine Indices
+    # Find the position (index) of the choices in the 'choice' list.
+    player_index = choice.index(player_choice)
+    computer_index = choice.index(computer_choice)
+    
+    # 4. Look up Result in Matrix
+    # The result is determined by finding the value at the intersection:
+    # lists[player_index (row)][computer_index (column)]
+    result = lists[player_index][computer_index]
+
+    # 5. Display Result
+    if result == "W":
+        print("🥳 **You Won!**")
+    elif result == "L":
+        print("😔 **You Lose!**")
+    else: # result == "D"
+        print("🤝 **It's a Draw!**")
+    
+    print("-" * 20) # Separator for next round
