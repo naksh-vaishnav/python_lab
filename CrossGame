@@ -1,0 +1,264 @@
+
+import sys # Import sys for the exit() function
+
+# --- Global Game State ---
+
+# Left bank (Start side)
+left_missionaries = 3
+left_canibals = 3
+
+# Right bank (Destination side)
+right_missionaries = 0
+right_canibals = 0
+
+# Boat state: Represents the two spots on the boat.
+# "." = empty, "m" = missionary, "c" = cannibal
+boat = ["."] * 2
+
+# Game state variable: True if boat is on the left, False if on the right.
+boat_on_left = True 
+
+# --- Core Game Functions ---
+
+def is_game_over():
+    """Checks the 'Game Over' condition for both sides of the river."""
+    global left_missionaries
+    global left_canibals
+    global right_missionaries
+    global right_canibals
+
+    # The rule: Cannibals outnumbering missionaries on *either* bank results in Game Over.
+    # Exception: If a bank is empty of missionaries, the cannibals are safe.
+    
+    # Check Left Bank
+    if left_missionaries > 0 and left_canibals > left_missionaries:
+        print("☠️ GAME OVER: Cannibals outnumbered missionaries on the left bank!")
+        return True
+
+    # Check Right Bank
+    if right_missionaries > 0 and right_canibals > right_missionaries:
+        print("☠️ GAME OVER: Cannibals outnumbered missionaries on the right bank!")
+        return True
+    
+    return False
+
+def board():
+    """
+    Handles boarding the boat from the current bank (where the boat is located).
+    The original code only handled boarding from the LEFT bank, this is corrected
+    to be dynamic.
+    """
+    global left_missionaries
+    global left_canibals
+    global right_missionaries
+    global right_canibals
+    global boat
+    global boat_on_left
+    
+    # Determine the current counts based on boat location
+    m_count = left_missionaries if boat_on_left else right_missionaries
+    c_count = left_canibals if boat_on_left else right_canibals
+    bank_name = "LEFT" if boat_on_left else "RIGHT"
+
+    print(f"\n--- Boarding from {bank_name} Bank ---")
+    print(f"Available on {bank_name}: M={m_count}, C={c_count}")
+    
+    # Initial 'Game Over' check before boarding (Original logic)
+    if is_game_over():
+        sys.exit()
+
+    try:
+        Option1 = int(input("Enter your Option 1 (1: missionary / 2: cannibal): "))
+        Option2 = int(input("Enter your Option 2 (1: missionary / 2: cannibal): "))
+    except ValueError:
+        print("❌ Invalid input. Please enter 1 or 2.")
+        return
+
+    # Map options to characters and calculate people requested
+    options_map = {1: 'm', 2: 'c'}
+    p1 = options_map.get(Option1)
+    p2 = options_map.get(Option2)
+    
+    # Calculate requested numbers
+    m_requested = (1 if p1 == 'm' else 0) + (1 if p2 == 'm' else 0)
+    c_requested = (1 if p1 == 'c' else 0) + (1 if p2 == 'c' else 0)
+
+    # Validate if enough people are on the current bank
+    if m_requested > m_count or c_requested > c_count:
+        print("❌ Invalid Move: Not enough people on this bank!")
+        return
+    
+    # Update the boat and the bank counts based on boat location
+    if boat_on_left:
+        left_missionaries -= m_requested
+        left_canibals -= c_requested
+    else: # Boat is on the right
+        right_missionaries -= m_requested
+        right_canibals -= c_requested
+    
+    # Place people on the boat
+    if p1 and p2:
+        boat[0] = p1
+        boat[1] = p2
+        print(f"🚢 Boarded: {m_requested} M and {c_requested} C.")
+    else:
+        print("❌ Enter a valid option (1 or 2 for both slots).")
+
+def cross_river():
+    """
+    Function to move the boat from one side to the other.
+    The original code named this 'Boat' and only handled moving people from left to right.
+    This corrects the core logic to allow movement in both directions.
+    """
+    global boat
+    global left_missionaries
+    global left_canibals
+    global right_missionaries
+    global right_canibals
+    global boat_on_left
+
+    # Check if the boat is empty (original logic check)
+    if boat == ["."] * 2:
+        print("🚫 The boat is empty! Please board at least one person first.")
+        return
+
+    # 1. Deboard on the DESTINATION side
+    m_in_boat = boat.count("m")
+    c_in_boat = boat.count("c")
+    
+    if boat_on_left:
+        # Move from Left to Right
+        right_missionaries += m_in_boat
+        right_canibals += c_in_boat
+        boat_on_left = False # Update boat location
+        print(f"🛥️ Boat crossed from LEFT to RIGHT. Landed {m_in_boat} M and {c_in_boat} C.")
+    else:
+        # Move from Right to Left
+        left_missionaries += m_in_boat
+        left_canibals += c_in_boat
+        boat_on_left = True # Update boat location
+        print(f"🛥️ Boat crossed from RIGHT to LEFT. Landed {m_in_boat} M and {c_in_boat} C.")
+
+    # 2. Empty the boat
+    boat = ["."] * 2
+
+    # 3. Check for Game Over after landing
+    if is_game_over():
+        sys.exit()
+    
+    # 4. Check for Win Condition (all 3 of each on the right bank)
+    if right_missionaries == 3 and right_canibals == 3:
+        print("\n🎉🎉 CONGRATULATIONS! You successfully moved everyone across! YOU WON! 🎉🎉")
+        sys.exit()
+    
+    # Print current status
+    display_status()
+
+
+def deboard():
+    """
+    Handles removing people from the boat *after* it has crossed.
+    The original deboard logic was incomplete and handled victory checks.
+    This function is redefined to handle returning people back to the bank for the return trip.
+    """
+    global right_missionaries
+    global right_canibals
+    global boat
+    global boat_on_left
+    
+    # Check if the boat is on the right bank and empty (Original condition was confusing)
+    if boat_on_left:
+        print("🚫 The boat is on the LEFT side. Use the 'board' operation (1) to move people onto the boat.")
+        return
+    
+    # Deboarding from the boat onto the RIGHT side happens automatically in cross_river().
+    # This 'deboard' function will now handle preparing for the return trip from the RIGHT.
+    
+    # This function should allow re-boarding from the right side.
+    # We call 'board()' to handle the logic flow, ensuring the user is prompted to move people
+    # from the right bank back onto the boat.
+    board()
+    
+def display_status():
+    """Prints the current state of the game (missionaries, cannibals, and boat location)."""
+    global left_missionaries
+    global left_canibals
+    global right_missionaries
+    global right_canibals
+    global boat
+    global boat_on_left
+    
+    boat_arrow = ">>>" if boat_on_left else "<<<"
+    
+    print("\n" + "=" * 40)
+    print(f"| LEFT BANK: M={left_missionaries}, C={left_canibals} |")
+    print(f"| BOAT: [{boat[0]}, {boat[1]}] {boat_arrow} |")
+    print(f"| RIGHT BANK: M={right_missionaries}, C={right_canibals} |")
+    print(f"Boat is currently on the {'LEFT' if boat_on_left else 'RIGHT'} bank.")
+    print("=" * 40)
+
+
+# --- Main Application Loop ---
+
+if __name__ == "__main__":
+    print("Welcome to Missionaries and Cannibals (3 vs 3)!")
+    print("Goal: Move all 3 M and 3 C to the RIGHT bank.")
+    print("Rule: Cannibals can never outnumber missionaries on either bank.")
+    display_status()
+    
+    while True:
+        message = input("Enter the operation (1:board/2:board from opposite bank/3:cross river/4:exit): ")
+
+        # Note: The original menu was confusing. 
+        # Case 1 now handles boarding from the current bank (where the boat is).
+        # Case 2 is removed/replaced, as boarding is handled by one function.
+        # Case 3 (Boat) is renamed to 'cross_river' for clarity.
+        
+        # We simplify the menu to: 1. Board from current side, 2. Cross River, 3. Exit
+        
+        match message:
+            case "1":
+                # Boarding from the current side (left or right)
+                board()
+                display_status()
+            case "2":
+                # Original case "2" (deboard) is removed as the logic is now handled inside cross_river/board.
+                # We reuse '2' for the 'cross river' operation to maintain flow, 
+                # or rename the menu options entirely for clarity. Let's use 1, 2, 3 for simplicity.
+                cross_river()
+            case "3":
+                print("Exiting the program")
+                sys.exit()
+            case _:
+                print("Enter a valid operation (1: Board, 2: Cross River, 3: Exit)")
+        
+
+def deboard():
+    global right_missionaries
+    global right_canibals
+    global boat
+
+    if right_canibals > right_missionaries:
+        print("Game Over")
+    else:
+        print(f"left side:{left_missionaries} ,{left_canibals}")
+        print(f"right side:{right_missionaries} , {left_canibals}")
+        if (right_missionaries == 3) and (right_canibals == 3):
+            print("You Won")
+            exit()
+
+while True:
+    message = input("Enter the operation to perform(1:board/2:deboard/3:boat/4:exit): ")
+
+    match message:
+        case "1":
+            board()
+        case "2":
+            deboard()
+        case "3":
+            Boat()
+        case "4":
+            print("Exiting the program")
+            break
+        case _:
+            print("Enter a valid operation")
