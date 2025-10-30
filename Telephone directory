@@ -1,0 +1,31 @@
+# telephone_dictionary.py
+
+# 1. Initialize the dictionary with default/placeholder user data.
+# This structure simulates a single contact entry.
+telephone_user = {
+    "name": "Neel",
+    "age": "19",
+    "address": "c/104",
+    "number": "8292"
+}
+
+# 2. Display the initial state of the dictionary.
+print("--- Initial Contact Data ---")
+print(telephone_user)
+print("--------------------------")
+
+# 3. Prompt the user for new data and update the dictionary (modification).
+# Dictionary keys are used to assign new values directly from user input.
+telephone_user["name"] = input("Enter your name: ")
+telephone_user["age"] = input("Enter your Age: ")
+telephone_user["address"] = input("Enter your Address: ")
+telephone_user["number"] = input("Enter your number: ")
+
+# 4. Display the updated state of the dictionary.
+print("\n--- Updated Contact Data ---")
+print(telephone_user)
+print("--------------------------")
+
+# 5. Display the data type of the variable.
+# This confirms the data is stored as a Python dictionary.
+print(f"The data type of the variable is: {type(telephone_user)}")
