@@ -1,0 +1,106 @@
+
+list1 = []
+
+def add():
+    task = input("Enter the Task: ")
+    list1.append(task)
+    with open("Task", 'a' ) as f:
+        f.write(task)
+        f.write("\n")
+    
+    if not list1:
+        print("There are no tasks!")
+    else:
+        for index, task in enumerate(list1, start=1):
+            print(f"{index} : {task}")
+
+
+
+def display():
+    global list1
+    with open("Task", 'r') as f:
+        list1 = f.readlines()
+    if not list1:
+        print("There are no tasks!")
+    else:
+        for index,task in enumerate(list1,start = 1):
+            print(f"{index} : {task}")
+
+
+
+def delete():
+    global list1
+    print("Select the task you want to delete: ")
+    
+    if not list1:
+        print("There are no tasks!")
+    else:
+        for index, task in enumerate(list1, start=1):
+            print(f"{index} : {task}")
+        
+        number = int(input("Enter the task number you want to delete: "))
+
+        if 1 <= number <= len(list1):
+            list1.pop(number - 1)
+        else:
+            print("Invalid task number!")
+    
+    if not list1:
+        print("There are no tasks!")
+    else:
+        for index, task in enumerate(list1, start=1):
+            print(f"{index} : {task}")
+
+
+
+def task_done():
+    global list1
+    list2 = []
+    print("Select the Task you want to mark as done: ")
+
+    if not list1:
+        print("There are no tasks!")
+    else:
+        for index, task in enumerate(list1, start = 1):
+            print(f"{index} : {task}")
+
+    task_no = int(input("Enter the task number you want to mark as done: "))
+    if 1 <= task_no <= len(list1):
+        list2.append(list1[task_no - 1])
+        list1.pop(task_no - 1)
+    else:
+        print("Invalid task number!")
+
+    print("The following tasks are remaining!! ")
+
+    if not list1:
+        print("There are no tasks!")
+    else:
+        for index,task in enumerate(list1, start = 1):
+            print(f"{index} : {task}")
+
+    print("The following tasks are done!! ")
+
+    if not list2:
+        print("There are no tasks!")
+    else:
+        for index,task in enumerate(list2, start = 1):
+            print(f"{index} : {task}")
+
+
+
+while True:
+    message = int(input("Enter the operation you want to perform (1:add, 2:delete, 3:task done, 4:display, 5:Exit): "))
+    match message:
+        case 1 :
+            add()
+        case 2 :
+            delete()
+        case 3 :
+            task_done()
+        case 4 :
+            display()
+        case 5:
+            break
+        case _:
+            print("Invalid Operation")
